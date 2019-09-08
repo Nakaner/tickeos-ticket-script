@@ -1,0 +1,4 @@
+*.aux
+*.log
+*.eps
+data/
