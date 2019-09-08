@@ -2,3 +2,4 @@
 *.log
 *.eps
 data/
+*.pyc
