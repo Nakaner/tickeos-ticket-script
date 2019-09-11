@@ -3,3 +3,7 @@
 *.eps
 data/
 *.pyc
+
+# documentation of TICKeos API (must not be committed due to copyright restrictions)
+TICKeos_Comboticket_SSTdoku*.pdf
+TICKeos_Kombiticket_SSTdoku*.pdf
