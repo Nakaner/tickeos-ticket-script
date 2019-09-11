@@ -2,6 +2,7 @@ import base64
 import io
 import os
 import os.path
+import sys
 
 class Ticket:
     def __init__(self, **kwargs):
@@ -25,19 +26,21 @@ class Ticket:
         return "{}_{}.{}".format(clean(self.ticket_id), clean(self.email), suffix)
 
 
-    def get_sand_save_ticket(self, soap_client, png_directory, **kwargs):
-        params = kwargs
-        params["output_format"] = "PNG"
-        params["passengerSurname"] = self.last_name
-        params["passengerName"] = self.first_name
-        params["eventDate"] = kwargs["start_date"]
-        params["eventDateUntil"] = kwargs["end_date"]
-        params["authToken"] = kwargs["auth_token"]
+    def get_and_save_ticket(self, soap_client, png_directory, **kwargs):
+        config = kwargs["tickeos"]
+        params = {
+            "outputFormat": "PNG",
+            "passengerSurname": self.last_name,
+            "passengerName": self.first_name,
+            "eventDate": config["startDate"],
+            "eventDateUntil": config["endDate"]
+        }
+        for key in ["authToken", "systemID", "organizerID", "eventID"]:
+            params[key] = config[key]
         params["ticketID"] = self.ticket_id
-        #TODO implement retrieval
-        soap_client.generate(**params)
-        png_data = base64.b64decode(soap_client.ticketData)
-        self.internalTicketId = soap_client.internalTicketId
+        result = soap_client.service.generate(**params)
+        png_data = base64.b64decode(result.get("ticketData"))
+        self.internalTicketId = result.get("internalTicketId")
         filename = self.get_file_name("png")
         output_filename = os.path.join(output_directory, filename)
         with open(output_filename, "wb") as pngfile:

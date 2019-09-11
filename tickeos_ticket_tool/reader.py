@@ -1,4 +1,5 @@
 import csv
+from .ticket import Ticket
 
 class OrdersReader:
     def __init__(self, input_file):
@@ -17,16 +18,16 @@ class HOTReader(OrdersReader):
         reader = csv.DictReader(self.input_file, delimiter=";")
         orders = []
         for row in reader:
-            orders.append(self._normalise(row))
+            orders.append(Ticket(**(self._normalise(row))))
         return orders
 
     def _normalise(self, row):
         entry = {}
-        entry["first_name"] = row["First Name"]
-        entry["last_name"] = row["Last Name"]
+        entry["first_name"] = row["First Name"].strip()
+        entry["last_name"] = row["Last Name"].strip()
         entry["id"] = row["Order #"]
         entry["ticket_type"] = row["Ticket Type"]
-        entry["email"] = row["Email"]
+        entry["email"] = row["Email"].strip()
         return entry
 
 
@@ -46,7 +47,7 @@ class OSMFReader(OrdersReader):
         reader = csv.DictReader(self.input_file, delimiter=",")
         orders = []
         for row in reader:
-            orders.append(self._normalise(row))
+            orders.append(Ticket(**(self._normalise(row))))
         return orders
 
     def _parse_fee_level(self, level):
@@ -92,9 +93,9 @@ class OSMFReader(OrdersReader):
     def _normalise(self, row):
         entry = {}
         #TODO split name
-        entry["first_name"] = row["Display Name"]
-        entry["last_name"] = row["Display Name"]
+        entry["first_name"] = row["First Name"].strip()
+        entry["last_name"] = row["Last Name"].strip()
         entry["id"] = row["ID"]
         entry["ticket_type"], entry["price"] = self._parse_fee_level(row["Fee level"])
-        entry["email"] = row["Email"]
+        entry["email"] = row["Email"].strip()
         return entry
