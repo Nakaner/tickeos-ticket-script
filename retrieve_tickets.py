@@ -16,10 +16,8 @@ from tickeos_ticket_tool.reader import OSMFReader, HOTReader
 def setup_soap(**kwargs):
     session = requests.Session()
     session.auth = requests.auth.HTTPBasicAuth(kwargs["username"], kwargs["password"])
-    session.verify = False
     sys.stderr.write("using username {}\n".format(kwargs["username"]))
     session.headers = {"user-agent": "state-of-the-map-tickeos-ticket-tool/0.1"}
-    #session.max_redirects = 0
     transport = zeep.Transport(session=session)
     return zeep.Client(kwargs["wsdl_url"], None, transport)
 
@@ -43,12 +41,17 @@ def escape_tex(value, linebreaks=False):
 parser = argparse.ArgumentParser(description="Retrieve combotickets from the TICKeos API")
 parser.add_argument("-c", "--config", type=argparse.FileType("r"), help="configuration file path", required=True)
 parser.add_argument("-i", "--input-type", type=str, help="input file structure ('hot' or 'osmf')", required=True)
+parser.add_argument("-l", "--log-level", help="log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)", default="INFO", type=str)
 parser.add_argument("input_file", type=argparse.FileType("r"), help="input CSV file")
 parser.add_argument("output_directory", type=str, help="path to output directory")
 parser.add_argument("csv_output_file", type=argparse.FileType("w"), help="output CSV file for email script")
 args = parser.parse_args()
 
-logging.basicConfig(level=logging.DEBUG)
+# log level
+numeric_log_level = getattr(logging, args.log_level.upper())
+if not isinstance(numeric_log_level, int):
+    raise ValueError("Invalid log level {}".format(args.log_level.upper()))
+logging.basicConfig(level=numeric_log_level)
 
 config = configparser.ConfigParser()
 config.read_file(args.config)

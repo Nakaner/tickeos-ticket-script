@@ -38,9 +38,19 @@ class Ticket:
         for key in ["authToken", "systemID", "organizerID", "eventID"]:
             params[key] = config[key]
         params["ticketID"] = self.ticket_id
-        result = soap_client.service.generate(**params)
-        png_data = base64.b64decode(result.get("ticketData"))
-        self.internalTicketId = result.get("internalTicketId")
+        # The development instance of the API does not contain the right addresses in the WSDL document.
+        alternative_address = config.get("alternative_address")
+        s = soap_client.service
+        if alternative_address:
+            soap_client._default_service._binding_options["address"] = alternative_address
+        service_proxy = soap_client.service
+        result = service_proxy.generate(**params)
+        if result.returnCode != 0:
+            sys.stderr.write("ERROR: API response not ok!\n{} {}\n".format(result.returnCode, result.returnValue))
+            exit(1)
+        sys.stderr.write("{}\n".format(result))
+        png_data = base64.b64decode(result.ticketData)
+        self.internalTicketId = result.internalTicketId
         filename = self.get_file_name("png")
         output_filename = os.path.join(output_directory, filename)
         with open(output_filename, "wb") as pngfile:
