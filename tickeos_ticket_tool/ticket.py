@@ -50,7 +50,7 @@ class Ticket:
             exit(1)
         sys.stderr.write("{}\n".format(result))
         png_data = base64.b64decode(result.ticketData)
-        self.internalTicketId = result.internalTicketId
+        self.internalTicketId = result.internalTicketID
         filename = self.get_file_name("png")
         output_filename = os.path.join(output_directory, filename)
         with open(output_filename, "wb") as pngfile:
