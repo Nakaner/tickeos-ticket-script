@@ -1,3 +1,4 @@
+import codecs
 import csv
 from .ticket import Ticket
 
@@ -15,10 +16,11 @@ class HOTReader(OrdersReader):
         super(HOTReader, self).__init__(input_file)
 
     def get_orders(self):
-        reader = csv.DictReader(self.input_file, delimiter=";")
         orders = []
-        for row in reader:
-            orders.append(Ticket(**(self._normalise(row))))
+        with codecs.open(self.input_file, "r", "iso-8859-1") as f:
+            reader = csv.DictReader(f, delimiter=";")
+            for row in reader:
+                orders.append(Ticket(**(self._normalise(row))))
         return orders
 
     def _normalise(self, row):
@@ -27,6 +29,7 @@ class HOTReader(OrdersReader):
         entry["last_name"] = row["Last Name"].strip()
         entry["id"] = row["Order #"]
         entry["ticket_type"] = row["Ticket Type"]
+        entry["price"] = float(row["Total Paid"])
         entry["email"] = row["Email"].strip()
         return entry
 
@@ -44,10 +47,11 @@ class OSMFReader(OrdersReader):
         super(OSMFReader, self).__init__(input_file)
 
     def get_orders(self):
-        reader = csv.DictReader(self.input_file, delimiter=",")
         orders = []
-        for row in reader:
-            orders.append(Ticket(**(self._normalise(row))))
+        with codecs.open(self.input_file, "r", "utf-8") as f:
+            reader = csv.DictReader(f, delimiter=",")
+            for row in reader:
+                orders.append(Ticket(**(self._normalise(row))))
         return orders
 
     def _parse_fee_level(self, level):
@@ -86,7 +90,7 @@ class OSMFReader(OrdersReader):
             ticket_name = "{} {}".format(ticket_type, eb_parts[0])
         else:
             price = self.prices[(ticket_type, early_bird)]
-            ticket_name = early_bird
+            ticket_name = "{} {}".format(ticket_type, early_bird)
         return ticket_name, price
 
 

@@ -10,6 +10,7 @@ import re
 import requests
 import sys
 import zeep
+import zeep.cache
 from tickeos_ticket_tool.ticket import Ticket
 from tickeos_ticket_tool.reader import OSMFReader, HOTReader
 
@@ -18,7 +19,7 @@ def setup_soap(**kwargs):
     session.auth = requests.auth.HTTPBasicAuth(kwargs["username"], kwargs["password"])
     sys.stderr.write("using username {}\n".format(kwargs["username"]))
     session.headers = {"user-agent": "state-of-the-map-tickeos-ticket-tool/0.1"}
-    transport = zeep.Transport(session=session)
+    transport = zeep.Transport(session=session, cache=zeep.cache.SqliteCache())
     return zeep.Client(kwargs["wsdl_url"], None, transport)
 
 def escape_tex(value, linebreaks=False):
@@ -42,7 +43,7 @@ parser = argparse.ArgumentParser(description="Retrieve combotickets from the TIC
 parser.add_argument("-c", "--config", type=argparse.FileType("r"), help="configuration file path", required=True)
 parser.add_argument("-i", "--input-type", type=str, help="input file structure ('hot' or 'osmf')", required=True)
 parser.add_argument("-l", "--log-level", help="log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)", default="INFO", type=str)
-parser.add_argument("input_file", type=argparse.FileType("r"), help="input CSV file")
+parser.add_argument("input_file", type=str, help="input CSV file")
 parser.add_argument("output_directory", type=str, help="path to output directory")
 parser.add_argument("csv_output_file", type=argparse.FileType("w"), help="output CSV file for email script")
 args = parser.parse_args()
@@ -94,8 +95,9 @@ tex_template = os.path.basename(config["output"]["template"])
 template = env.get_template(tex_template)
 png_directory = config["temp"]["png_directory"]
 soap_client = setup_soap(**(config["tickeos"]))
-out_writer = csv.DictWriter(args.csv_output_file, fieldnames=["first_name", "last_name", "email", "attachment", "internalTicketId"], delimiter=";", extrasaction="ignore")
+out_writer = csv.DictWriter(args.csv_output_file, fieldnames=["first_name", "last_name", "email", "attachment", "internalTicketId", "ticket_id"], delimiter=";", extrasaction="ignore")
+out_writer.writeheader()
 for t in ticket_orders:
     t.get_and_save_ticket(soap_client, png_directory, **config)
-    t.render_template(png_directory, env, template, args.output_directory)
-    out_writer.writerow(t.dict_for_csv())
+    t.render_ticket_pdf(png_directory, env, template, args.output_directory, config["output"]["path_from_tex_to_png"])
+    out_writer.writerow(t.dict_for_csv(args.output_directory))
