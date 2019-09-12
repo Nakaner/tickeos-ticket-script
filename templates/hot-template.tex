@@ -4,6 +4,7 @@
 \setotherlanguage{german}
 \setmainfont{Barlow}
 \setsansfont{Barlow}
+\newfontfamily\BarlowCondensed{Barlow Condensed}
 
 \usepackage{geometry}
 \geometry{
@@ -26,6 +27,7 @@
 \usepackage[table]{xcolor}
 
 \usepackage{tikz}
+\definecolor{hotblack}{HTML}{23262D}
 
 \definecolor{ochsenblutrot}{HTML}{59191F}
 \definecolor{tramstop}{HTML}{4255B3}
@@ -57,16 +59,17 @@
 \advance\titleRightBoxWidth by -\titleLeftBoxWidth
 
 \begin{tikzpicture}[x=1mm, y=1mm]
-  \fill[color=ochsenblutrot, rounded corners=4mm] (0,0) rectangle (\linewidth, 30);
+%  \fill[color=ochsenblutrot, rounded corners=4mm] (0,0) rectangle (\linewidth, 30);
+  \fill[hotblack] (0,0) rectangle (170,30);
   \node at (15,0) [anchor=south west, inner sep=3mm] {%
-    \includegraphics[height=24mm]{../templates/images/sotm19-logo.pdf}%
+    \includegraphics[height=24mm]{../templates/images/summit-logo-small.png}%
   };
   \node at (55,5) [anchor=south west, inner sep=3mm] {%
     \begin{minipage}{\titleRightBoxWidth}%
       \Large
       \color{white}
-      \textbf{\LARGE STATE OF THE MAP}\\
-      Heidelberg, 21–23 September 2019
+      \textbf{\LARGE\BarlowCondensed HOT SUMMIT 2019}\\
+      Heidelberg, 19–20 September 2019
     \end{minipage}%
   };
 \end{tikzpicture}
@@ -81,11 +84,11 @@
 \tabularnewline
 \hline
 \bilingualHeading{\large Price}{Preis} & {\large EUR ((( data['price']|e )))}
-& ---
-& ---
+& {\large \textbf{Ticket ID}}
+& {\large ((( data['ticket_id']|e )))}
 \tabularnewline
 \hline
-%\bilingualHeading{\large Organiser}{Veranstalter} & \multicolumn{3}{L{105mm}|}{OpenStreetMap Foundation, St John’s Innovation Centre, Cowley Road, Cambridge, CB4 0WS, Vereinigtes Königreich}\tabularnewline
+%\bilingualHeading{\large Organiser}{Veranstalter} & \multicolumn{3}{L{105mm}|}{Humanitarian OpenStreetMap Team US Inc., OpenGov Hub, 1110 Vermont Ave. NW, Suite 500, Washington D.C., 20005, USA}\tabularnewline
 %\hline
 \end{tabular}
 \renewcommand{\arraystretch}{1.0}
@@ -110,7 +113,7 @@
   
     \largeSpace
     \bilingualHeading{\large Next tram stop}{Nächste Haltestelle}\\
-    Technologiepark
+    Technologiepark 
   
     \largeSpace
     \bilingualHeading{\large Social Event}{Abendveranstaltung}\\
