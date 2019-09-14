@@ -94,14 +94,20 @@ class OSMFReader(OrdersReader):
         return ticket_name, price
 
 
+    def _normalise_name(self, name):
+        """Make the first character uppercase."""
+        if name[0].lower() == name[0]:
+            return name[0].upper() + name[1:]
+        return name
+
+
     def _normalise(self, row):
         entry = {}
-        #TODO split name
-        entry["first_name"] = row["First Name"].strip()
-        middle_name = row.get("Middle Name", "").strip()
+        entry["first_name"] = self._normalise_name(row["First Name"].strip())
+        middle_name = self._normalise_name(row.get("Middle Name", "").strip())
         if middle_name:
             entry["first_name"] += " {}".format(middle_name)
-        entry["last_name"] = row["Last Name"].strip()
+        entry["last_name"] = self._normalise_name(row["Last Name"].strip())
         entry["id"] = row["ID"]
         entry["ticket_type"], entry["price"] = self._parse_fee_level(row["Fee level"])
         entry["email"] = row["Email"].strip()
