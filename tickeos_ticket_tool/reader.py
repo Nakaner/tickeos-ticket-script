@@ -1,5 +1,6 @@
 import codecs
 import csv
+import logging
 from .ticket import Ticket
 
 class OrdersReader:
@@ -14,6 +15,7 @@ class OrdersReader:
 class HOTReader(OrdersReader):
     def __init__(self, input_file):
         super(HOTReader, self).__init__(input_file)
+        self.id_set = set()
 
     def get_orders(self):
         orders = []
@@ -27,7 +29,20 @@ class HOTReader(OrdersReader):
         entry = {}
         entry["first_name"] = row["First Name"].strip()
         entry["last_name"] = row["Last Name"].strip()
-        entry["id"] = row["Order #"]
+        # Ugly hack because the Eventbrite export has order IDs, not ticket IDs.
+        order_id = row["Order #"]
+        if order_id in self.id_set:
+            i = 1
+            for i in range(1, 11):
+                if i == 10:
+                    logging.fatal("More than 10 tickets for order {}, aborting.".format(order_id))
+                    exit(1)
+                new_order_id = "{}-{}".format(order_id, i)
+                if new_order_id not in self.id_set:
+                    order_id = new_order_id
+                    break
+        entry["id"] = order_id
+        self.id_set.add(order_id)
         entry["ticket_type"] = row["Ticket Type"]
         entry["price"] = float(row["Total Paid"])
         entry["email"] = row["Email"].strip()
