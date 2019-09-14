@@ -78,7 +78,7 @@ class OSMFReader(OrdersReader):
             elif "_LocalTeam" in eb_parts[1]:
                 price = 0
             elif "SotM2019_discount_a4wsD2w" in eb_parts[1]:
-                price = 45
+                price = 75
             elif "_YouthMapper" in eb_parts[1]:
                 price = 0
             elif "_Ministry_of_Transport" in eb_parts[1]:
