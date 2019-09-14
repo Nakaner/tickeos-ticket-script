@@ -96,6 +96,8 @@ class OSMFReader(OrdersReader):
 
     def _normalise_name(self, name):
         """Make the first character uppercase."""
+        if not name or len(name) < 2:
+            return name
         if name[0].lower() == name[0]:
             return name[0].upper() + name[1:]
         return name
