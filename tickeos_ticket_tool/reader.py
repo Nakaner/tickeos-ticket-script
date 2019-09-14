@@ -100,6 +100,12 @@ class OSMFReader(OrdersReader):
                 price = 0
             elif "_OsmAND" in eb_parts[1]:
                 price = 0
+            elif "nas_cww" in eb_parts[1]:
+                price = 120
+                eb_parts[0] = "Standard Price"
+            elif "_wire_4mg3" in eb_parts[1]:
+                price = 180
+                eb_parts[0] = "Early Bird"
             else:
                 raise Exception("Unknown voucher type: {}".format(level))
             ticket_name = "{} {}".format(ticket_type, eb_parts[0])
