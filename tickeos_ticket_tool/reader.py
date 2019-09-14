@@ -98,6 +98,9 @@ class OSMFReader(OrdersReader):
         entry = {}
         #TODO split name
         entry["first_name"] = row["First Name"].strip()
+        middle_name = row.get("Middle Name", "").strip()
+        if middle_name:
+            entry["first_name"] += " {}".format(middle_name)
         entry["last_name"] = row["Last Name"].strip()
         entry["id"] = row["ID"]
         entry["ticket_type"], entry["price"] = self._parse_fee_level(row["Fee level"])
