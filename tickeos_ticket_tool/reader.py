@@ -19,8 +19,8 @@ class HOTReader(OrdersReader):
 
     def get_orders(self):
         orders = []
-        with codecs.open(self.input_file, "r", "iso-8859-1") as f:
-            reader = csv.DictReader(f, delimiter=";")
+        with codecs.open(self.input_file, "r", "utf-8") as f:
+            reader = csv.DictReader(f, delimiter=",")
             for row in reader:
                 orders.append(Ticket(**(self._normalise(row))))
         return orders
