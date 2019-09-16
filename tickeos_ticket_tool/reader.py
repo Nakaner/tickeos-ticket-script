@@ -22,7 +22,9 @@ class HOTReader(OrdersReader):
         with codecs.open(self.input_file, "r", "utf-8") as f:
             reader = csv.DictReader(f, delimiter=",")
             for row in reader:
-                orders.append(Ticket(**(self._normalise(row))))
+                t = Ticket(**(self._normalise(row)))
+                if t.ticket_type != "Donation":
+                    orders.append(t)
         return orders
 
     def _normalise(self, row):
