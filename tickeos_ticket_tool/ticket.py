@@ -30,6 +30,26 @@ class Ticket:
         return "{}_{}.{}".format(self.clean(self.ticket_id), self.clean(self.email), suffix)
 
 
+    def revoke(self, soap_client, **kwargs):
+        config = kwargs["tickeos"]
+        params = {"internalTicketID": self.internal_ticket_id}
+        for key in ["authToken", "systemID"]:
+            params[key] = config[key]
+        alternative_address = config.get("alternative_address")
+        soap_client = self._update_service_address(soap_client, alternative_address)
+        service_proxy = soap_client.service
+        response = service_proxy.revokeByInternalTicketID(**params)
+        if response.returnCode == 0:
+            logging.info("Ticket with internal ID {} successfully revoked".format(self.internal_ticket_id))
+        else:
+            logging.error("Ticket with internal ID {} could not be revoked. API said: {}".format(self.internal_ticket_id, response.returnValue))
+
+    def _update_service_address(self, soap_client, alternative_address):
+        s = soap_client.service
+        if alternative_address:
+            soap_client._default_service._binding_options["address"] = alternative_address
+        return soap_client
+
     def get_and_save_ticket(self, soap_client, png_directory, re_request_only, **kwargs):
         config = kwargs["tickeos"]
         params = {
@@ -44,9 +64,7 @@ class Ticket:
         params["ticketID"] = self.ticket_id
         # The development instance of the API does not contain the right addresses in the WSDL document.
         alternative_address = config.get("alternative_address")
-        s = soap_client.service
-        if alternative_address:
-            soap_client._default_service._binding_options["address"] = alternative_address
+        soap_client = self._update_service_address(soap_client, alternative_address)
         service_proxy = soap_client.service
         if not re_request_only:
             logging.info("requesting ticket for {} {} from the API".format(self.first_name, self.last_name))
