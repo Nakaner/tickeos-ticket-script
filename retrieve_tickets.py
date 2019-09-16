@@ -98,6 +98,6 @@ soap_client = setup_soap(**(config["tickeos"]))
 out_writer = csv.DictWriter(args.csv_output_file, fieldnames=["first_name", "last_name", "email", "attachment", "internalTicketId", "ticket_id"], delimiter=";", extrasaction="ignore")
 out_writer.writeheader()
 for t in ticket_orders:
-    t.get_and_save_ticket(soap_client, png_directory, **config)
+    t.get_and_save_ticket(soap_client, png_directory, False, **config)
     t.render_ticket_pdf(png_directory, env, template, args.output_directory, config["output"]["path_from_tex_to_png"])
     out_writer.writerow(t.dict_for_csv(args.output_directory))

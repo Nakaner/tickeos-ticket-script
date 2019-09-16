@@ -14,7 +14,7 @@ class Ticket:
         self.shirt = kwargs.get("shirt")
         self.ticket_id = kwargs.get("id")
         self.email = kwargs.get("email")
-        self.internal_ticket_id = None
+        self.internal_ticket_id = kwargs.get("internal_ticket_id")
 
     def clean(self, filename):
         cleaned = ""
@@ -30,7 +30,7 @@ class Ticket:
         return "{}_{}.{}".format(self.clean(self.ticket_id), self.clean(self.email), suffix)
 
 
-    def get_and_save_ticket(self, soap_client, png_directory, **kwargs):
+    def get_and_save_ticket(self, soap_client, png_directory, re_request_only, **kwargs):
         config = kwargs["tickeos"]
         params = {
             "outputFormat": "PNG",
@@ -48,10 +48,14 @@ class Ticket:
         if alternative_address:
             soap_client._default_service._binding_options["address"] = alternative_address
         service_proxy = soap_client.service
-        logging.info("requesting ticket for {} {} from the API".format(self.first_name, self.last_name))
-        result = service_proxy.generate(**params)
-        if result.returnCode == 405:
-            logging.info("The ticket with ID {} for {} {} was already requested. Resending the generate request with the 'reRequest' parameter instead".format(self.ticket_id, self.first_name, self.last_name))
+        if not re_request_only:
+            logging.info("requesting ticket for {} {} from the API".format(self.first_name, self.last_name))
+            result = service_proxy.generate(**params)
+            if result.returnCode == 405:
+                logging.info("The ticket with ID {} for {} {} was already requested. Resending the generate request with the 'reRequest' parameter instead".format(self.ticket_id, self.first_name, self.last_name))
+        else:
+            logging.info("re-requesting ticket for {} {} from the API".format(self.first_name, self.last_name))
+        if re_request_only or result.returnCode == 405:
             params["reRequest"] = True
             result = service_proxy.generate(**params)
         if result.returnCode != 0:
